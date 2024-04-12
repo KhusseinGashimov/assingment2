@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
+}
+
+class ListItem {
+  int id;
+  String name;
+  String group;
+
+  ListItem({required this.id, required this.name, required this.group});
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,128 +23,99 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: ListPage(),
+      home: const ListScreen(),
     );
   }
 }
 
-class ListPage extends StatefulWidget {
+class ListScreen extends StatefulWidget {
+  const ListScreen({super.key});
+
   @override
-  _ListPageState createState() => _ListPageState();
+  _ListScreenState createState() => _ListScreenState();
 }
 
-class _ListPageState extends State<ListPage> {
-  List<Map<String, String>> lists = [];
+class _ListScreenState extends State<ListScreen> {
+  List<ListItem> items = [
+    ListItem(id: 1, name: 'Item 1', group: 'Group A'),
+    ListItem(id: 2, name: 'Item 2', group: 'Group B'),
+    ListItem(id: 3, name: 'Item 3', group: 'Group A'),
+  ];
 
-  void _addList() {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) {
-        String id = '';
-        String name = '';
-        String group = '';
-        return Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                decoration: InputDecoration(labelText: 'ID'),
-                onChanged: (value) => id = value,
-              ),
-              TextField(
-                decoration: InputDecoration(labelText: 'Name'),
-                onChanged: (value) => name = value,
-              ),
-              TextField(
-                decoration: InputDecoration(labelText: 'Group'),
-                onChanged: (value) => group = value,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    lists.add({'id': id, 'name': name, 'group': group});
-                  });
-                  Navigator.pop(context);
-                },
-                child: Text('Add'),
-              ),
-            ],
-          ),
-        );
-      },
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('List App'),
+        centerTitle: true,
+      ),
+      body: ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(items[index].id.toString()),
+            subtitle: Text("Name: ${items[index].name} Group: ${items[index].group}"),
+            onTap: () {
+              _showUpdateDialog(items[index]);
+            },
+            onLongPress: () {
+              _showDeleteDialog(items[index]);
+            },
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddDialog();
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
-  void _updateList(int index) {
-    showModalBottomSheet(
-      context: context,
-      builder: (_) {
-        String id = lists[index]['id']!;
-        String name = lists[index]['name']!;
-        String group = lists[index]['group']!;
-        return Padding(
-          padding: EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              TextField(
-                decoration: InputDecoration(labelText: 'ID'),
-                controller: TextEditingController(text: id),
-                onChanged: (value) => id = value,
-              ),
-              TextField(
-                decoration: InputDecoration(labelText: 'Name'),
-                controller: TextEditingController(text: name),
-                onChanged: (value) => name = value,
-              ),
-              TextField(
-                decoration: InputDecoration(labelText: 'Group'),
-                controller: TextEditingController(text: group),
-                onChanged: (value) => group = value,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    lists[index] = {'id': id, 'name': name, 'group': group};
-                  });
-                  Navigator.pop(context);
-                },
-                child: Text('Update'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  void _showAddDialog() {
+    TextEditingController nameController = TextEditingController();
+    TextEditingController groupController = TextEditingController();
 
-  void _deleteList(int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete List'),
-          content: Text('Are you sure you want to delete this list?'),
+          title: const Text('Add Item'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              TextField(
+                controller: groupController,
+                decoration: const InputDecoration(labelText: 'Group'),
+              ),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
+              child: const Text('Cancel'),
               onPressed: () {
-                setState(() {
-                  lists.removeAt(index);
-                });
                 Navigator.of(context).pop();
               },
-              child: Text('Delete'),
             ),
             TextButton(
+              child: const Text('Add'),
               onPressed: () {
+                // Add item to the list
+                int id = items.length + 1;
+                String name = nameController.text;
+                String group = groupController.text;
+
+                setState(() {
+                  items.add(ListItem(id: id, name: name, group: group));
+                });
+
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
             ),
           ],
         );
@@ -142,35 +123,85 @@ class _ListPageState extends State<ListPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+  void _showUpdateDialog(ListItem item) {
+    TextEditingController nameController =
+        TextEditingController(text: item.name);
+    TextEditingController groupController =
+        TextEditingController(text: item.group);
 
-      body: ListView.builder(
-        itemCount: lists.length,
-        itemBuilder: (BuildContext context, int index) {
-          
-          return ListTile(
-            title: Text(lists[index]['name']!),
-            subtitle: Text(
-                'ID: ${lists[index]['id']} | Group: ${lists[index]['group']}'),
-            onTap: () {
-              _updateList(index);
-            },
-            onLongPress: () {
-              _deleteList(index);
-            },
-          );
-        },
-      ),
-      
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _addList();
-        },
-        tooltip: 'Add List',
-        child: Icon(Icons.add),
-      ),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Update Item'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              TextField(
+                controller: groupController,
+                decoration: const InputDecoration(labelText: 'Group'),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Update'),
+              onPressed: () {
+                // Update item in the list
+                setState(() {
+                  item.name = nameController.text;
+                  item.group = groupController.text;
+                });
+
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  void _showDeleteDialog(ListItem item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Item'),
+          content: Text('Are you sure you want to delete ${item.name}?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Delete'),
+              onPressed: () {
+                _deleteItem(item);
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteItem(ListItem item) {
+    setState(() {
+      items.remove(item);
+    });
   }
 }
