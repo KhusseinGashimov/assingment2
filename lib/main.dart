@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'List App',
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false,  
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -54,7 +54,8 @@ class _ListScreenState extends State<ListScreen> {
         itemBuilder: (context, index) {
           return ListTile(
             title: Text(items[index].id.toString()),
-            subtitle: Text("Name: ${items[index].name} Group: ${items[index].group}"),
+            subtitle:
+                Text("Name: ${items[index].name} Group: ${items[index].group}"),
             onTap: () {
               _showUpdateDialog(items[index]);
             },
@@ -95,7 +96,7 @@ class _ListScreenState extends State<ListScreen> {
               ),
             ],
           ),
-          actions: <Widget>[
+          actions: [
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
@@ -136,7 +137,7 @@ class _ListScreenState extends State<ListScreen> {
           title: const Text('Update Item'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+            children: [
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Name'),
@@ -179,7 +180,7 @@ class _ListScreenState extends State<ListScreen> {
         return AlertDialog(
           title: const Text('Delete Item'),
           content: Text('Are you sure you want to delete ${item.name}?'),
-          actions: <Widget>[
+          actions: [
             TextButton(
               child: const Text('Delete'),
               onPressed: () {
